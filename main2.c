@@ -6,7 +6,7 @@
 #define THREADS 10
 
 void* thread (void* arg) {
-    int n = (rand() % 10000) + 1;
+    int n = rand() % 10001;
 
     for (int i = 0; i < n; ++i) {
         printf("Thread #%ld, i = %d\n", (long) arg, i);
