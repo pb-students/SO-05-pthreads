@@ -22,36 +22,32 @@ int main() {
     pthread_attr_init(&attr);
     pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_JOINABLE);
 
-    int error = 1;
-    do {
-        for (long i = 0; i < THREADS; ++i) {
-            if (pthread_create(&threads[i], &attr, thread, (void*) i)) goto errorHandler; // https://xkcd.com/292/
+    int error = 0;
+    for (long i = 0; i < THREADS; ++i) {
+        if (pthread_create(&threads[i], &attr, thread, (void*) i)) {
+            error = 1;
+            break;
         }
+    }
 
-        error = 0;
-    } while(0);
+    pthread_attr_destroy(&attr);
 
-    errorHandler:
     if (error) {
         fprintf(stderr, "Error creating new thread.");
         exit(EXIT_FAILURE);
     }
 
-    pthread_attr_destroy(&attr);
-
     long sum = 0;
-    error = 1;
-    do {
-        for (int i = 0; i < THREADS; ++i) {
-            void *status;
-            if (pthread_join(threads[i], &status)) goto errorHandler2;
-            sum += (long) status;
+    for (int i = 0; i < THREADS; ++i) {
+        void *status;
+        if (pthread_join(threads[i], &status)) {
+            error = 1;
+            break;
         }
 
-        error = 0;
-    } while (0);
+        sum += (long) status;
+    }
 
-    errorHandler2:
     if (error) {
         fprintf(stderr, "Error joining threads.");
         exit(EXIT_FAILURE);
